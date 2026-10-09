@@ -52,7 +52,7 @@ No adelantes trabajo de fases futuras sin preguntar.
 - **Antes de empezar**, enséñame el plan y espera mi OK, salvo en cambios pequeños que yo indique.
 - **Verifica, no supongas:** versiones, opciones de plugins y APIs se comprueban en la documentación. Si no puedes comprobar algo, dilo.
 - **Ramas y PRs:** nunca trabajes directamente en `main`. Una rama por cambio (`feat/…`, `fix/…`, `docs/…`, `chore/…`), push de la rama y yo abro el PR y hago el merge (squash). No hagas merge ni push a `main`.
-- **Antes de cada commit:** `./mvnw verify` en verde y `git status` revisado.
+- **Antes de cada commit:** `git status` revisado, y `./mvnw verify` en verde antes de cada commit que toque código, configuración o el contrato.
 - **Un bug de producción** se corrige con un test que falle antes del arreglo y pase después.
 - **Cuando una decisión cambie algo de un ADR**, avisa y propón el ADR nuevo o la actualización.
 
