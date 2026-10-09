@@ -7,6 +7,7 @@ Las decisiones de arquitectura están en `docs/adr/` (índice en `docs/adr/READM
 ## Stack
 
 - **Backend:** Java 25 (vía Maven Toolchains), Spring Boot 4.1, Spring Modulith, Spring Data JPA, Flyway, MapStruct.
+  - El build compila y testea con un JDK 25 aunque Maven se lance con otro. Requiere `~/.m2/toolchains.xml` con una entrada `<type>jdk</type>`, `<provides><version>25</version></provides>` y `<configuration><jdkHome>` apuntando a la instalación del JDK 25; sin ella, `./mvnw verify` falla con `Cannot find matching toolchain`. Ver la [guía oficial de Maven Toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html). La imagen Docker genera su propio `toolchains.xml`.
 - **API First** ([ADR 0002](docs/adr/0002-api-first-con-openapi.md)): `api/openapi.yaml` (OpenAPI 3.1) es la fuente de verdad. openapi-generator crea interfaces y DTOs en `target/`; los controladores implementan las interfaces generadas. Nunca se definen rutas a mano.
 - **Monolito modular** ([ADR 0003](docs/adr/0003-monolito-modular-con-spring-modulith.md)): un paquete por módulo de negocio (`profile`, …). `api` (código generado) y `shared` son módulos `OPEN`. `ApplicationModules.verify()` debe pasar siempre.
 - **Errores** ([ADR 0004](docs/adr/0004-errores-con-problem-details.md)): Problem Details (RFC 9457). Handler por módulo + handler global de menor precedencia.
@@ -60,4 +61,4 @@ No adelantes trabajo de fases futuras sin preguntar.
 - Rutas en inglés, kebab-case, versionadas con `/api/v1`.
 - Esquemas del contrato en PascalCase, propiedades en camelCase.
 - Commits con Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`…), en inglés.
-- Saltos de línea: LF en todo salvo `*.cmd` y `*.bat` (ver `.gitattributes`).
+- Saltos de línea (ver `.gitattributes`): el repositorio guarda LF; en disco, LF obligatorio para `Dockerfile`, `mvnw` y `*.sh`, CRLF para `*.cmd` y `*.bat`, y el resto según la plataforma (CRLF en Windows).
