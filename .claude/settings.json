@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw *)",
+      "PowerShell(.\\mvnw.cmd *)",
+      "Bash(docker compose -f backend/compose.yaml *)",
+      "PowerShell(docker compose -f backend/compose.yaml *)",
+      "WebFetch(domain:docs.spring.io)",
+      "WebFetch(domain:repo1.maven.org)",
+      "WebFetch(domain:openapi-generator.tech)"
+    ]
+  }
+}
