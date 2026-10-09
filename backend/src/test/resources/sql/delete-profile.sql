@@ -1,1 +1,1 @@
-DELETE FROM profile;
+DELETE FROM portfolio.profile;

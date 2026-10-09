@@ -13,10 +13,24 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+  # Las tablas de la aplicación viven en su propio esquema: en Supabase "public"
+  # ya contiene objetos de la plataforma y Flyway se niega a migrar un esquema no vacío.
+  # Flyway crea "portfolio" y fija el search_path en él durante la migración, así que
+  # las sentencias sin esquema de las migraciones acaban ahí.
+  flyway:
+    default-schema: portfolio
+    schemas: portfolio
+    create-schemas: true
+
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+    properties:
+      # Hibernate califica cada consulta con el esquema (no depende del search_path,
+      # que no se conserva entre transacciones en el pooler de Supabase en modo transaction).
+      hibernate:
+        default_schema: portfolio
 
   mvc:
     problemdetails:

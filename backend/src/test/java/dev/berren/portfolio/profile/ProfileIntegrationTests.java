@@ -3,6 +3,7 @@ package dev.berren.portfolio.profile;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.berren.portfolio.TestcontainersConfiguration;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +11,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
@@ -20,6 +22,21 @@ class ProfileIntegrationTests {
 
 	@Autowired
 	private MockMvcTester mvc;
+
+	@Autowired
+	private JdbcTemplate jdbc;
+
+	@Test
+	void createsApplicationTablesInPortfolioSchemaEvenIfPublicIsNotEmpty() {
+		// Como en Supabase, "public" ya contiene objetos ajenos (script de init del contenedor).
+		assertThat(tablesIn("public")).containsExactly("supabase_platform_object");
+		assertThat(tablesIn("portfolio")).containsExactlyInAnyOrder("flyway_schema_history", "profile", "social_link");
+	}
+
+	private List<String> tablesIn(String schema) {
+		return jdbc.queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = ?",
+				String.class, schema);
+	}
 
 	@Test
 	@Sql("/sql/delete-profile.sql")

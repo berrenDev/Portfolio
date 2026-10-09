@@ -7,5 +7,6 @@
 # Dentro de backend/, fuera artefactos locales y lo que no va en la imagen.
 backend/target/
 backend/compose.yaml
+backend/docker/
 backend/Dockerfile
 backend/**/*.log
