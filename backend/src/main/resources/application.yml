@@ -12,6 +12,10 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      # Límite de conexiones del plan gratuito de Supabase. Se puede sobrescribir
+      # con la variable de entorno SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE.
+      maximum-pool-size: 5
 
   # Las tablas de la aplicación viven en su propio esquema: en Supabase "public"
   # ya contiene objetos de la plataforma y Flyway se niega a migrar un esquema no vacío.
