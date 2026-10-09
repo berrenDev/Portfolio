@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: portfolio
+
+  # Conexión por variables de entorno. En local, spring-boot-docker-compose
+  # levanta compose.yaml y sustituye esta conexión; en los tests lo hace Testcontainers.
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

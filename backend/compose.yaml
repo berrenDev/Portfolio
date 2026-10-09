@@ -1,0 +1,12 @@
+# PostgreSQL para desarrollo local (lo arranca spring-boot-docker-compose).
+# Única fuente de la versión de PostgreSQL: los tests con Testcontainers leen
+# la imagen de este fichero. Ajustarla a la versión de Supabase.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: portfolio
+      POSTGRES_USER: portfolio
+      POSTGRES_PASSWORD: portfolio
+    ports:
+      - '5432'
