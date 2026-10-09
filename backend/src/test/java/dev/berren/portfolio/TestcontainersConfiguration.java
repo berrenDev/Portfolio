@@ -11,6 +11,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 import org.yaml.snakeyaml.Yaml;
 
 @TestConfiguration(proxyBeanMethods = false)
@@ -18,10 +19,14 @@ public class TestcontainersConfiguration {
 
 	private static final Path COMPOSE_FILE = Path.of("compose.yaml");
 
+	/** Scripts de inicialización compartidos con compose.yaml (simulan Supabase). */
+	private static final Path INIT_SCRIPTS = Path.of("docker/postgres/init");
+
 	@Bean
 	@ServiceConnection
 	PostgreSQLContainer postgresContainer() {
-		return new PostgreSQLContainer(DockerImageName.parse(postgresImageFromCompose()));
+		return new PostgreSQLContainer(DockerImageName.parse(postgresImageFromCompose()))
+			.withCopyFileToContainer(MountableFile.forHostPath(INIT_SCRIPTS), "/docker-entrypoint-initdb.d/");
 	}
 
 	/**

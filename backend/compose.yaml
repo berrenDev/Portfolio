@@ -10,3 +10,6 @@ services:
       POSTGRES_PASSWORD: portfolio
     ports:
       - '5432'
+    volumes:
+      # Mismos scripts de inicialización que en los tests (simulan Supabase).
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
