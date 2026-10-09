@@ -13,7 +13,7 @@ info:
 servers:
   - url: http://localhost:8080
     description: Local
-  - url: https://api.tudominio.dev
+  - url: https://portfolio-api-wqxu.onrender.com
     description: Production
 
 tags:
@@ -48,13 +48,13 @@ paths:
                       - Arquitecturas modulares con Spring Modulith
                       - Testing con Testcontainers
                     location: Madrid, España
-                    avatarUrl: https://cdn.tudominio.dev/img/avatar.webp
-                    cvUrl: https://cdn.tudominio.dev/files/cv.pdf
+                    avatarUrl: https://example.com/img/avatar.webp
+                    cvUrl: https://example.com/files/cv.pdf
                     socialLinks:
                       - platform: github
                         url: https://github.com/berrenDev
                       - platform: linkedin
-                        url: https://www.linkedin.com/in/berrendev
+                        url: https://www.linkedin.com/in/alejandro-berrendero-g%C3%B3mez/
                       - platform: email
                         url: mailto:berrendev@gmail.com
         '404':
@@ -106,13 +106,13 @@ components:
           format: uri
           description: URL absoluta de la imagen de perfil.
           examples:
-            - https://cdn.tudominio.dev/img/avatar.webp
+            - https://example.com/img/avatar.webp
         cvUrl:
           type: string
           format: uri
           description: URL absoluta del CV descargable.
           examples:
-            - https://cdn.tudominio.dev/files/cv.pdf
+            - https://example.com/files/cv.pdf
         socialLinks:
           type: array
           description: |
