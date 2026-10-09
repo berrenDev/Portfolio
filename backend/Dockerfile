@@ -54,10 +54,10 @@ USER app
 # Ajustes para contenedores pequeños (512 MB en Render). Se pueden sobrescribir
 # desde Render definiendo JAVA_TOOL_OPTIONS sin reconstruir la imagen.
 # Medido con 512 MB: fuera del heap la JVM ocupa ~220 MB (metaspace, code cache,
-# hilos, GC, malloc), por eso el heap se limita al 70 % y no al 75 %.
+# hilos, GC, malloc). Con el heap al 50 % (~256 MB) el peor caso cabe en 512 MB.
 # MALLOC_ARENA_MAX limita las arenas de glibc, que inflan el RSS en contenedores
 # (en la medición redujo el RSS ~55 MB).
-ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError -Xss512k" \
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=50 -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError -Xss512k" \
     MALLOC_ARENA_MAX=2
 
 # Render inyecta PORT; la aplicación lo lee con server.port=${PORT:8080}.

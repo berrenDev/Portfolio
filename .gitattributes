@@ -1,0 +1,12 @@
+# Normaliza a LF en el repositorio todo lo que Git detecte como texto.
+* text=auto
+
+# LF obligatorio en ficheros que se ejecutan en Linux (contenedores, CI, Render),
+# aunque se editen o se haga checkout en Windows.
+Dockerfile text eol=lf
+mvnw       text eol=lf
+*.sh       text eol=lf
+
+# CRLF para scripts de Windows.
+*.cmd text eol=crlf
+*.bat text eol=crlf
