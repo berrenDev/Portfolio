@@ -1,0 +1,11 @@
+# Lista de permitidos: se ignora todo salvo lo que necesita backend/Dockerfile.
+# Así quedan fuera .git, node_modules, IDEs, .env, .claude, docs/ y el futuro frontend/.
+*
+!api/openapi.yaml
+!backend/
+
+# Dentro de backend/, fuera artefactos locales y lo que no va en la imagen.
+backend/target/
+backend/compose.yaml
+backend/Dockerfile
+backend/**/*.log
