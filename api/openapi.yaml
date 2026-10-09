@@ -54,7 +54,7 @@ paths:
                       - platform: github
                         url: https://github.com/berrenDev
                       - platform: linkedin
-                        url: https://www.linkedin.com/in/berrendev
+                        url: https://www.linkedin.com/in/alejandro-berrendero-g%C3%B3mez/
                       - platform: email
                         url: mailto:berrendev@gmail.com
         '404':
