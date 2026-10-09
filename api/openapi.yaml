@@ -1,0 +1,228 @@
+openapi: 3.1.0
+
+info:
+  title: Portfolio API
+  version: 1.0.0
+  description: |
+    API pública del portfolio personal. Expone el perfil profesional que
+    consume el frontend. Los errores siguen Problem Details (RFC 9457).
+  contact:
+    name: berrenDev
+    email: berrendev@gmail.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local
+  - url: https://api.tudominio.dev
+    description: Production
+
+tags:
+  - name: Profile
+    description: Perfil profesional mostrado en el portfolio.
+
+paths:
+  /api/v1/profile:
+    get:
+      operationId: getProfile
+      tags:
+        - Profile
+      summary: Obtener el perfil
+      description: Devuelve el perfil profesional publicado en el portfolio.
+      responses:
+        '200':
+          description: Perfil encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+              examples:
+                profile:
+                  summary: Perfil completo
+                  value:
+                    fullName: Ana García López
+                    headline: Backend Developer · Java & Spring
+                    summary: |
+                      Desarrollador backend centrado en **Java** y **Spring Boot**.
+
+                      - APIs REST con enfoque *API First*
+                      - Arquitecturas modulares con Spring Modulith
+                      - Testing con Testcontainers
+                    location: Madrid, España
+                    avatarUrl: https://cdn.tudominio.dev/img/avatar.webp
+                    cvUrl: https://cdn.tudominio.dev/files/cv.pdf
+                    socialLinks:
+                      - platform: github
+                        url: https://github.com/berrenDev
+                      - platform: linkedin
+                        url: https://www.linkedin.com/in/berrendev
+                      - platform: email
+                        url: mailto:berrendev@gmail.com
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    Profile:
+      type: object
+      description: Perfil profesional del autor del portfolio.
+      additionalProperties: false
+      required:
+        - fullName
+        - headline
+        - summary
+        - socialLinks
+      properties:
+        fullName:
+          type: string
+          description: Nombre completo.
+          minLength: 1
+          maxLength: 100
+          examples:
+            - Ana García López
+        headline:
+          type: string
+          description: Titular corto que resume el perfil.
+          minLength: 1
+          maxLength: 150
+          examples:
+            - Backend Developer · Java & Spring
+        summary:
+          type: string
+          description: Presentación extendida en formato Markdown.
+          contentMediaType: text/markdown
+          minLength: 1
+          examples:
+            - "Desarrollador backend centrado en **Java** y **Spring Boot**."
+        location:
+          type: string
+          description: Ubicación aproximada.
+          maxLength: 100
+          examples:
+            - Madrid, España
+        avatarUrl:
+          type: string
+          format: uri
+          description: URL absoluta de la imagen de perfil.
+          examples:
+            - https://cdn.tudominio.dev/img/avatar.webp
+        cvUrl:
+          type: string
+          format: uri
+          description: URL absoluta del CV descargable.
+          examples:
+            - https://cdn.tudominio.dev/files/cv.pdf
+        socialLinks:
+          type: array
+          description: |
+            Enlaces a perfiles externos, en el orden en que deben mostrarse.
+            Puede estar vacío, nunca es nulo.
+          items:
+            $ref: '#/components/schemas/SocialLink'
+
+    SocialLink:
+      type: object
+      description: Enlace a un perfil externo o medio de contacto.
+      additionalProperties: false
+      required:
+        - platform
+        - url
+      properties:
+        platform:
+          $ref: '#/components/schemas/SocialPlatform'
+        url:
+          type: string
+          format: uri
+          description: URL absoluta del enlace (admite `mailto:` para email).
+          examples:
+            - https://github.com/berrenDev
+
+    SocialPlatform:
+      type: string
+      description: Plataforma del enlace; el frontend la usa para elegir el icono.
+      enum:
+        - github
+        - gitlab
+        - linkedin
+        - x
+        - bluesky
+        - mastodon
+        - stackoverflow
+        - website
+        - email
+      examples:
+        - github
+
+    ProblemDetail:
+      type: object
+      description: Detalle de error según RFC 9457 (Problem Details for HTTP APIs).
+      additionalProperties: true
+      required:
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: URI que identifica el tipo de problema.
+          default: about:blank
+          examples:
+            - about:blank
+        title:
+          type: string
+          description: Resumen legible del tipo de problema.
+          examples:
+            - Not Found
+        status:
+          type: integer
+          format: int32
+          description: Código de estado HTTP generado por el servidor.
+          minimum: 100
+          maximum: 599
+          examples:
+            - 404
+        detail:
+          type: string
+          description: Explicación legible específica de esta ocurrencia.
+          examples:
+            - Profile has not been created yet.
+        instance:
+          type: string
+          format: uri-reference
+          description: URI que identifica esta ocurrencia concreta del problema.
+          examples:
+            - /api/v1/profile
+
+  responses:
+    NotFound:
+      description: El recurso solicitado no existe.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          examples:
+            profileNotFound:
+              summary: Perfil aún no creado
+              value:
+                type: about:blank
+                title: Not Found
+                status: 404
+                detail: Profile has not been created yet.
+                instance: /api/v1/profile
+
+    InternalServerError:
+      description: Error inesperado del servidor.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+          examples:
+            internalError:
+              summary: Error genérico
+              value:
+                type: about:blank
+                title: Internal Server Error
+                status: 500
+                detail: An unexpected error occurred.
+                instance: /api/v1/profile
