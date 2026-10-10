@@ -9,8 +9,9 @@
 FROM maven:3.9-eclipse-temurin-25 AS build
 
 # El pom exige un toolchain JDK 25 (maven-toolchains-plugin). Dentro del contenedor
-# se declara el JDK de la propia imagen; si la imagen dejara de traer un JDK 25,
-# el build fallaría en lugar de compilar en silencio con otro JDK.
+# se declara el JDK de la propia imagen como versión 25. Este fichero no comprueba
+# qué JDK hay realmente en $JAVA_HOME: si la imagen dejara de traer un JDK 25, lo que
+# haría fallar el build es el compilador (--release 25 no existe en JDKs anteriores).
 RUN mkdir -p /root/.m2 && cat > /root/.m2/toolchains.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <toolchains>
