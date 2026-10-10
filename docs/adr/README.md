@@ -11,3 +11,4 @@ Decisiones de arquitectura del portfolio, en formato [MADR](https://adr.github.i
 | [0005](0005-hosting-render-y-supabase.md) | Hosting: backend en Render y PostgreSQL en Supabase | Aceptado | 2026-10-09 |
 | [0006](0006-esquema-propio-portfolio.md) | Esquema propio `portfolio` en PostgreSQL | Aceptado | 2026-10-09 |
 | [0007](0007-adrs-en-repositorio-sincronizados-a-bd.md) | ADRs en el repositorio, sincronizados a la base de datos por webhook | Propuesto | 2026-10-09 |
+| [0008](0008-ci-con-github-actions-y-main-protegida.md) | CI con GitHub Actions y `main` protegida | Aceptado | 2026-10-10 |

@@ -20,13 +20,14 @@ Las decisiones de arquitectura están en `docs/adr/` (índice en `docs/adr/READM
 api/openapi.yaml   contrato único (validado con .spectral.yaml)
 backend/           Spring Boot (Dockerfile, compose.yaml para desarrollo local)
 docs/adr/          decisiones de arquitectura (MADR 4, front matter con decision-makers)
+.github/workflows/ci.yml  CI: contrato (Spectral + oasdiff) y backend (./mvnw verify)
 frontend/          Angular (todavía no existe)
 .claude/           settings.json compartido; settings.local.json es personal e ignorado
 ```
 
 ## Producción ([ADR 0005](docs/adr/0005-hosting-render-y-supabase.md))
 
-- **Backend:** Render (Docker, Frankfurt, plan Free por ahora). Despliegue automático en cada merge a `main` que toque `backend/**` o `api/**`.
+- **Backend:** Render (Docker, Frankfurt, plan Free por ahora). Despliegue automático en cada merge a `main` que toque `backend/**` o `api/**`, solo cuando la CI de ese commit pasa (*After CI Checks Pass*, [ADR 0008](docs/adr/0008-ci-con-github-actions-y-main-protegida.md)).
 - **Base de datos:** Supabase Free (Frankfurt), Session pooler (IPv4), Data API desactivada, pool de Hikari de 5 conexiones.
 - **Configuración por variables de entorno:** `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`. Nunca escribas credenciales, tokens ni URLs con contraseña en el código, en los commits ni en los mensajes.
 - **JVM:** ajustada a 512 MB en el Dockerfile. Si cambias dependencias o memoria, vuelve a medir con `--memory=512m`.
@@ -35,15 +36,17 @@ frontend/          Angular (todavía no existe)
 
 **Hecho (paso 1):** `GET /api/v1/profile` en producción con el perfil real, Docker, despliegue continuo y ADRs 0001–0006 aceptados.
 
-**Fase actual: CI con GitHub Actions.**
-- En cada PR: `./mvnw verify` (tests con Testcontainers), lint del contrato con Spectral y detección de cambios incompatibles en el contrato.
-- Render solo despliega si la CI pasa.
+**Hecho (CI)** ([ADR 0008](docs/adr/0008-ci-con-github-actions-y-main-protegida.md)):
+- Workflow `.github/workflows/ci.yml`: en cada PR y push a `main`, lint del contrato con Spectral, detección de cambios incompatibles con oasdiff (solo en PRs) y `./mvnw verify` (tests con Testcontainers). Filtro por rutas a nivel de job.
+- `main` protegida por un ruleset: PR obligatorio con merge por squash, checks `changes`, `contract` y `backend` obligatorios, sin force push ni borrado y sin bypass.
+- Render despliega con *After CI Checks Pass*: solo si la CI de ese commit pasa.
+
+**Fase actual: resto del perfil** (experiencia, skills y certificaciones).
 
 **Siguientes fases:**
-1. Resto del perfil: experiencia, skills y certificaciones.
-2. Módulo `devlog`: sincronización de ADRs y releases por webhook de GitHub ([ADR 0007](docs/adr/0007-adrs-en-repositorio-sincronizados-a-bd.md), propuesto) y entradas del devlog.
-3. Frontend Angular prerenderizado en Cloudflare Pages, con cliente generado del contrato.
-4. Panel de administración con login de GitHub (OAuth2) y Spring Session JDBC.
+1. Módulo `devlog`: sincronización de ADRs y releases por webhook de GitHub ([ADR 0007](docs/adr/0007-adrs-en-repositorio-sincronizados-a-bd.md), propuesto) y entradas del devlog.
+2. Frontend Angular prerenderizado en Cloudflare Pages, con cliente generado del contrato.
+3. Panel de administración con login de GitHub (OAuth2) y Spring Session JDBC.
 
 No adelantes trabajo de fases futuras sin preguntar.
 
@@ -51,7 +54,8 @@ No adelantes trabajo de fases futuras sin preguntar.
 
 - **Antes de empezar**, enséñame el plan y espera mi OK, salvo en cambios pequeños que yo indique.
 - **Verifica, no supongas:** versiones, opciones de plugins y APIs se comprueban en la documentación. Si no puedes comprobar algo, dilo.
-- **Ramas y PRs:** nunca trabajes directamente en `main`. Una rama por cambio (`feat/…`, `fix/…`, `docs/…`, `chore/…`), push de la rama y yo abro el PR y hago el merge (squash). No hagas merge ni push a `main`.
+- **Ramas y PRs:** nunca trabajes directamente en `main`. Una rama por cambio (`feat/…`, `fix/…`, `docs/…`, `chore/…`, `ci/…`), push de la rama y yo abro el PR y hago el merge (squash). No hagas merge ni push a `main`.
+- **`main` está protegida:** nadie puede hacer push directo, tampoco el propietario. Todo entra por PR con la CI en verde (`changes`, `contract` y `backend`; los jobs que no aplican aparecen como *Skipped* y no bloquean).
 - **Antes de cada commit:** `git status` revisado, y `./mvnw verify` en verde antes de cada commit que toque código, configuración o el contrato.
 - **Un bug de producción** se corrige con un test que falle antes del arreglo y pase después.
 - **Cuando una decisión cambie algo de un ADR**, avisa y propón el ADR nuevo o la actualización.
