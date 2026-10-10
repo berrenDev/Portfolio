@@ -38,6 +38,7 @@ Se ejecuta en cada PR hacia `main` y en cada push a `main`, con tres jobs:
 - Checks obligatorios: `changes`, `contract` y `backend`.
 - Sin force push ni borrado de `main`.
 - **Lista de bypass vacía:** la regla se aplica también al propietario del repositorio.
+- **No se exige que la rama esté al día con `main`** (*Require branches to be up to date before merging* desactivado). Con un solo desarrollador y PRs secuenciales, el riesgo es bajo. Si dos PRs se rompieran al combinarse, lo detectaría la CI del push a `main` y Render no desplegaría ese commit. Se reconsiderará si colaboran más personas.
 
 ### Despliegue
 
