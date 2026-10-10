@@ -70,7 +70,6 @@ components:
       additionalProperties: false
       required:
         - fullName
-        - headline
         - summary
         - socialLinks
       properties:
