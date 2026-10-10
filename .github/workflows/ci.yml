@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Una sola ejecución activa por PR (o por rama en push): la nueva cancela la anterior.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Filtra por rutas a nivel de job en lugar de usar on.<evento>.paths: así los jobs
+  # que no aplican aparecen como "Skipped" (cuenta como superado en los checks
+  # requeridos) y no se quedan "pendientes" para siempre en los PRs.
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read # paths-filter lee la lista de ficheros del PR con la API
+    outputs:
+      contract: ${{ steps.filter.outputs.contract }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      # En push, paths-filter compara con git y necesita el repositorio.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        with:
+          # Un cambio en la propia CI ejecuta todos los jobs.
+          filters: |
+            contract:
+              - 'api/**'
+              - '.github/workflows/ci.yml'
+            backend:
+              - 'backend/**'
+              - 'api/**'
+              - '.github/workflows/ci.yml'
+
+  contract:
+    needs: changes
+    if: needs.changes.outputs.contract == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint with Spectral
+        run: >
+          docker run --rm -v "$PWD:/work" -w /work stoplight/spectral:6.17.0
+          lint api/openapi.yaml --ruleset .spectral.yaml --fail-severity warn
+
+      - name: Fetch base branch
+        if: github.event_name == 'pull_request'
+        run: git fetch --depth=1 origin "$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+
+      - name: Check breaking changes with oasdiff
+        if: github.event_name == 'pull_request'
+        uses: oasdiff/oasdiff-action/breaking@b9325c9e0a27ab65b0da3b766522cedec6be81dc # v0.1.18
+        with:
+          base: origin/${{ github.base_ref }}:api/openapi.yaml
+          revision: HEAD:api/openapi.yaml
+          fail-on: ERR
+          # No subir el contrato a oasdiff.com ni comentar en el PR (no necesita pull-requests: write).
+          review: 'false'
+          github-token: ''
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # setup-java registra el JDK en ~/.m2/toolchains.xml con <version> igual al input
+      # java-version ("25"), que es lo que exige maven-toolchains-plugin en el pom.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Show Maven toolchains
+        run: cat ~/.m2/toolchains.xml
+
+      - name: Build and test
+        run: ./mvnw -B verify
+
+      - name: Upload Surefire reports
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: surefire-reports
+          path: backend/target/surefire-reports/
+          retention-days: 7
